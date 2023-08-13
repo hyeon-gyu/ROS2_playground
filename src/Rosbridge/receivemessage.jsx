@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ROSLIB from 'roslib';
-import rosBridgeClient from './rosBridgeClient'; // Adjust the path according to your project structure
+import rosBridgeClient from './rosBridgeClient';
 
 function ReceiveMessage() {
   const [receivedMessage, setReceivedMessage] = useState('');
