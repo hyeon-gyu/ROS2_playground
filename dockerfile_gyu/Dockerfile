@@ -65,9 +65,6 @@ RUN echo "source /home/$USER/bashrc.foxy-tutor" >> ~/.bashrc
 
 ### Beginner: CLI tools
 RUN sudo apt update && sudo apt install -y ros-foxy-turtlesim && sudo apt install -y ~nros-foxy-rqt* && sudo apt-get install wget
-# RUN sudo apt install -y ros-foxy-turtlesim
-# RUN sudo apt install -y ~nros-foxy-rqt*
-# RUN sudo apt-get install wget
 
 ### Beginner: Client libraries
 
@@ -128,7 +125,7 @@ RUN sudo chown -R $USER:$USER /home/$USER/ros2_ws/
 #############################################################
 ### install f1tenth simulator
 RUN sudo apt-get update --fix-missing
-RUN sudo apt-get install -y git && sudo apt-get install -y nano && sudo apt-get install -y libeigen3-dev && sudo apt-get install -y tmux && sudo apt-get install -y ros-foxy-rviz2
+RUN sudo apt-get install -y git && sudo apt-get install -y nano && sudo apt install -y libeigen3-dev && sudo apt-get install -y tmux && sudo apt-get install -y ros-foxy-rviz2
 WORKDIR /home/$USER/
 RUN git clone https://github.com/f1tenth/f1tenth_gym
 WORKDIR /home/$USER/f1tenth_gym
@@ -136,7 +133,7 @@ WORKDIR /home/$USER/f1tenth_gym
 
 WORKDIR /home/$USER/
 RUN mkdir -p f1t_ws/src
-WORKDIR f1t_ws/src
+WORKDIR /home/$USER/f1t_ws/src
 RUN git clone https://github.com/f1tenth/f1tenth_gym_ros
 
 RUN /bin/bash -c "source /opt/ros/foxy/setup.bash"
@@ -165,15 +162,11 @@ RUN sudo rm -rf f1tenth_ws
 #############################################################
 ### vesc package && transport_drivers
 #############################################################
-RUN sudo mkdir -p vesc_ws/src
 WORKDIR /home/$USER/f1t_ws/src
 RUN sudo git clone https://github.com/f1tenth/vesc.git -b foxy && sudo git clone https://github.com/ros-drivers/transport_drivers.git -b foxy 
-WORKDIR /home/$USER/vesc_ws/
-RUN /bin/bash -c "source /opt/ros/foxy/setup.bash"
-WORKDIR /home/$USER/vesc_ws
-# RUN rosdep install --from-paths vesc --rosdistro foxy -i -y && rosdep install --from-paths transport_drivers --rosdistro foxy -i -y
-RUN rosdep install --from-paths src --rosdistro foxy -i -y
-RUN sudo apt-get -y update && sudo apt-get -y upgrade
+WORKDIR /home/$USER/f1t_ws
+# RUN rosdep install --from-paths src --rosdistro foxy -i -y
+# RUN sudo apt-get -y update && sudo apt-get -y upgrade
 
 #############################################################
 ### intel realsense camera
@@ -185,12 +178,11 @@ RUN sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key F6E65AC044F831A
 RUN sudo add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo focal main" -u
 RUN sudo apt-get -y install librealsense2-utils && sudo apt-get -y install librealsense2-dev
 
-RUN sudo mkdir -p realsense_ws/src
-WORKDIR /home/$USER/realsense_ws/src
+WORKDIR /home/$USER/f1t_ws/src
 RUN sudo git clone --depth 1 --branch `git ls-remote --tags https://github.com/IntelRealSense/realsense-ros.git | grep -Po "(?<=tags/)3.\d+\.\d+" | sort -V | tail -1` https://github.com/IntelRealSense/realsense-ros.git
-WORKDIR /home/$USER/realsense_ws
+WORKDIR /home/$USER/f1t_ws
 RUN sudo apt-get install python3-rosdep -y
-WORKDIR /home/$USER/realsense_ws
+WORKDIR /home/$USER/f1t_ws
 RUN sudo apt-get install ros-foxy-diagnostic-updater
 RUN rosdep install -i --from-path src --rosdistro $_ros_dist --skip-keys=librealsense2 -y || true
 RUN /bin/bash -c "source /opt/ros/foxy/setup.bash"
@@ -200,18 +192,18 @@ RUN sudo apt-get -y update && sudo apt-get -y upgrade
 ### hokuyo lidar
 #############################################################
 WORKDIR /home/$USER/
-RUN sudo mkdir -p /home/$USER/hokuyo_ws/src
-WORKDIR /home/$USER/hokuyo_ws/src
+WORKDIR /home/$USER/f1t_ws//src
 RUN sudo git clone --recursive https://github.com/Hokuyo-aut/urg_node2.git
-WORKDIR /home/$USER/hokuyo_ws
-RUN rosdep update --include-eol-distros && rosdep install -i --from-paths src --rosdistro foxy -y
+WORKDIR /home/$USER/f1t_ws/
+RUN rosdep update --include-eol-distros && rosdep install -i --from-paths src --rosdistro foxy -y -r
 RUN sudo apt-get -y update && sudo apt-get -y upgrade
+
+#remote controller
+
 
 ### change the owner of copied files
 RUN sudo chown -R $USER:$USER /home/$USER/f1t_ws
-RUN sudo chown -R $USER:$USER /home/$USER/realsense_ws
-RUN sudo chown -R $USER:$USER /home/$USER/hokuyo_ws
-RUN sudo chown -R $USER:$USER /home/$USER/vesc_ws
+
 RUN /bin/bash -c "source /opt/ros/foxy/setup.bash"
 ### done!
 WORKDIR /home/$USER
