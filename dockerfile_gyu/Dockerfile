@@ -1,6 +1,6 @@
 # Image name: ssu/misys:foxy-f1t-tutor
 # docker build -t ssu/misys:foxy-f1t-tutor --build-arg USER=$USER .
-
+# ./run.sh 1000 foxy-f1t-tutor
 
 # alias foxy-tutor='docker run --privileged -it -u 1000 -e SDL_VIDEODRIVER=x11 -e DISPLAY=$DISPLAY -e XAUTHORITY=$XAUTHORITY -v /tmp/.X11-unix:/tmp/.X11-unix -v $XAUTHORITY:$XAUTHORITY -v /usr/share/vulkan:/usr/share/vulkan -v /home/$USER/shared_dir:/home/$USER/shared_dir -v /dev:/dev --ipc=host --gpus '\''all,"capabilities=graphics,utility,display,video,compute"'\'' --net=host --runtime=nvidia ssu/misys:foxy-f1t-tutor-user'
 
@@ -129,7 +129,7 @@ RUN sudo apt-get install -y git && sudo apt-get install -y nano && sudo apt inst
 WORKDIR /home/$USER/
 RUN git clone https://github.com/f1tenth/f1tenth_gym
 WORKDIR /home/$USER/f1tenth_gym
-# RUN pip3 install -e .
+RUN pip3 install -e .
 
 WORKDIR /home/$USER/
 RUN mkdir -p f1t_ws/src
@@ -150,11 +150,6 @@ WORKDIR /home/$USER/
 RUN sudo git clone https://github.com/CL2-UWaterloo/f1tenth_ws.git
 RUN sudo mv /home/$USER/f1tenth_ws/src/* /home/$USER/f1t_ws/src
 
-
-### build packages
-# WORKDIR /home/$USER/f1t_ws
-# RUN /bin/bash -c "source /opt/ros/foxy/setup.sh && colcon build"
-
 ### remove the git clone
 WORKDIR /home/$USER/
 RUN sudo rm -rf f1tenth_ws
@@ -165,8 +160,14 @@ RUN sudo rm -rf f1tenth_ws
 WORKDIR /home/$USER/f1t_ws/src
 RUN sudo git clone https://github.com/f1tenth/vesc.git -b foxy && sudo git clone https://github.com/ros-drivers/transport_drivers.git -b foxy 
 WORKDIR /home/$USER/f1t_ws
-# RUN rosdep install --from-paths src --rosdistro foxy -i -y
-# RUN sudo apt-get -y update && sudo apt-get -y upgrade
+
+#remote controller
+WORKDIR /home/$USER/
+RUN sudo git clone https://github.com/min-kim-oss/f1tenth-controller.git
+WORKDIR /home/$USER/f1tenth-controller
+RUN sudo mv remocon_server /home/$USER/f1t_ws/src
+WORKDIR /home/$USER/
+RUN sudo rm -rf f1tenth-controller
 
 #############################################################
 ### intel realsense camera
@@ -192,14 +193,11 @@ RUN sudo apt-get -y update && sudo apt-get -y upgrade
 ### hokuyo lidar
 #############################################################
 WORKDIR /home/$USER/
-WORKDIR /home/$USER/f1t_ws//src
+WORKDIR /home/$USER/f1t_ws/src
 RUN sudo git clone --recursive https://github.com/Hokuyo-aut/urg_node2.git
 WORKDIR /home/$USER/f1t_ws/
 RUN rosdep update --include-eol-distros && rosdep install -i --from-paths src --rosdistro foxy -y -r
 RUN sudo apt-get -y update && sudo apt-get -y upgrade
-
-#remote controller
-
 
 ### change the owner of copied files
 RUN sudo chown -R $USER:$USER /home/$USER/f1t_ws
