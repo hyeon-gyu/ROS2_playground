@@ -35,7 +35,8 @@ VOLUMES="--volume=$XSOCK:$XSOCK:ro
 	 --volume=$SHARED_HOST_DIR:$SHARED_DOCK_DIR:rw
 	 --volume=/media:/media:rw
 	 --volume=/dev/shm:/dev/shm:rw
-	 --volume=/dev/ttyUSB0:/dev/ttyUSB0:ro"
+	 --volume=/dev/ttyUSB0:/dev/ttyUSB0:ro
+  	 --volume=/dev/video*:/dev/video* "
 	 
 ENVIRONS="--env DISPLAY=$DISPLAY
 	  --env SDL_VIDEODRIVER=x11
