@@ -36,7 +36,7 @@ VOLUMES="--volume=$XSOCK:$XSOCK:ro
 	 --volume=/media:/media:rw
 	 --volume=/dev/shm:/dev/shm:rw
 	 --volume=/dev/ttyUSB0:/dev/ttyUSB0:ro
-  	 --volume=/dev/video*:/dev/video* "
+  	 --volume=/dev/video*:/dev/video*:ro "
 	 
 ENVIRONS="--env DISPLAY=$DISPLAY
 	  --env SDL_VIDEODRIVER=x11
