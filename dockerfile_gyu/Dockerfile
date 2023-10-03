@@ -1,8 +1,8 @@
-# Image name: ssu/misys:foxy-f1t-tutor
-# docker build -t ssu/misys:foxy-f1t-tutor --build-arg USER=$USER .
-# ./run.sh 1000 foxy-f1t-tutor
+# Image name: awws:f1t-foxy
+# docker build -t awws:f1t-foxy --build-arg USER=$USER .
+# ./run.sh 1000 awws:f1t-foxy
 
-# alias foxy-tutor='docker run --privileged -it -u 1000 -e SDL_VIDEODRIVER=x11 -e DISPLAY=$DISPLAY -e XAUTHORITY=$XAUTHORITY -v /tmp/.X11-unix:/tmp/.X11-unix -v $XAUTHORITY:$XAUTHORITY -v /usr/share/vulkan:/usr/share/vulkan -v /home/$USER/shared_dir:/home/$USER/shared_dir -v /dev:/dev --ipc=host --gpus '\''all,"capabilities=graphics,utility,display,video,compute"'\'' --net=host --runtime=nvidia ssu/misys:foxy-f1t-tutor-user'
+# alias f1t-foxy='docker run --privileged -it -u 1000 -e SDL_VIDEODRIVER=x11 -e DISPLAY=$DISPLAY -e XAUTHORITY=$XAUTHORITY -v /tmp/.X11-unix:/tmp/.X11-unix -v $XAUTHORITY:$XAUTHORITY -v /usr/share/vulkan:/usr/share/vulkan -v /home/$USER/shared_dir:/home/$USER/shared_dir -v /dev:/dev --ipc=host --gpus '\''all,"capabilities=graphics,utility,display,video,compute"'\'' --net=host --runtime=nvidia ssu/misys:foxy-f1t-tutor-user'
 
 FROM nvcr.io/nvidia/l4t-base:r35.1.0
 ARG USER
