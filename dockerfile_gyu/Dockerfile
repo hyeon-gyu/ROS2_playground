@@ -1,6 +1,6 @@
-# Image name: awws:f1t-foxy
-# docker build -t awws:f1t-foxy --build-arg USER=$USER .
-# ./run.sh 1000 awws:f1t-foxy
+# Image name: awws:foxy-f1t
+# docker build -t awws:foxy-f1t --build-arg USER=autoware .
+# ./run.sh 1000 f1t-foxy
 
 # alias f1t-foxy='docker run --privileged -it -u 1000 -e SDL_VIDEODRIVER=x11 -e DISPLAY=$DISPLAY -e XAUTHORITY=$XAUTHORITY -v /tmp/.X11-unix:/tmp/.X11-unix -v $XAUTHORITY:$XAUTHORITY -v /usr/share/vulkan:/usr/share/vulkan -v /home/$USER/shared_dir:/home/$USER/shared_dir -v /dev:/dev --ipc=host --gpus '\''all,"capabilities=graphics,utility,display,video,compute"'\'' --net=host --runtime=nvidia ssu/misys:foxy-f1t-tutor-user'
 
@@ -13,12 +13,11 @@ RUN apt install sudo
 
 RUN echo "${USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
+### run under the name of $USER
+USER $USER 
+
 ### create a default user
 RUN sudo adduser $USER && sudo adduser $USER sudo && sudo adduser $USER audio && sudo adduser $USER systemd-timesync && sudo adduser $USER video
-
-
-### run under the name of $USER
-USER $USER
 
 ### set Locale
 RUN sudo apt update && sudo apt install locales
