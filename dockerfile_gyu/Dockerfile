@@ -9,15 +9,15 @@ ARG USER
 
 ### install Sudo option
 RUN apt update && apt -y upgrade
-RUN apt install sudo
+RUN apt install sudo 
 
 RUN echo "${USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-### run under the name of $USER
-USER $USER 
-
 ### create a default user
 RUN sudo adduser $USER && sudo adduser $USER sudo && sudo adduser $USER audio && sudo adduser $USER systemd-timesync && sudo adduser $USER video
+
+### run under the name of $USER
+USER $USER 
 
 ### set Locale
 RUN sudo apt update && sudo apt install locales
@@ -201,6 +201,10 @@ RUN sudo apt-get -y update && sudo apt-get -y upgrade
 ### change the owner of copied files
 RUN sudo chown -R $USER:$USER /home/$USER/f1t_ws
 
+### need to add USER name
+RUN sudo echo USER="autoware" >> ~/.bashrc
+
 RUN /bin/bash -c "source /opt/ros/foxy/setup.bash"
+
 ### done!
 WORKDIR /home/$USER
