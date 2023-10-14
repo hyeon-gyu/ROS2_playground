@@ -44,6 +44,7 @@ VOLUMES="--volume=$XSOCK:$XSOCK:ro
 	 --volume=/dev/video5:/dev/video5:rw
 	 --volume=/dev/iio/device0:/dev/iio/device0:rw
 	 --volume=/dev/iio/device1:/dev/iio/device1:rw
+	 --volume=/sys/devices/platform/3610000.xhci:/sys/devices/platform/3610000.xhci:rw
 	 --volume=/dev/ttyACM0:/dev/ttyACM0:rw"
 	 
 ENVIRONS="--env DISPLAY=$DISPLAY
@@ -79,5 +80,7 @@ docker run -it \
 	$IMAGE	  
 
 
-###sudo chown -R autoware:autoware /sys/devices/platform/3610000.xhci/usb2/2-3/2-3.4/2-3.4\:1.5/0003\:8086\:0B5C.000B/HID-SENSOR-200073.2.auto/iio\:device0/
-###sudo chown -R autoware:autoware /sys/devices/platform/3610000.xhci/usb2/2-3/2-3.4/2-3.4\:1.5/0003\:8086\:0B5C.000B/HID-SENSOR-200076.3.auto/iio\:device1/
+###sudo chown -R $USER:$USER /sys/devices/platform/3610000.xhci/usb2/2-3/2-3.4/2-3.4\:1.5/0003\:8086\:0B5C.000B/HID-SENSOR-200073.2.auto/iio\:device0/
+###sudo chown -R $USER:$USER /sys/devices/platform/3610000.xhci/usb2/2-3/2-3.4/2-3.4\:1.5/0003\:8086\:0B5C.000B/HID-SENSOR-200076.3.auto/iio\:device1/
+# sudo chown -R $USER:$USER /dev/iio:device1
+# sudo chown -R $USER:$USER /dev/iio:device0
