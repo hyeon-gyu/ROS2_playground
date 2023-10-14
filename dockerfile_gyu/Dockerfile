@@ -1,10 +1,10 @@
 # Image name: awws:foxy-f1t
-# docker build -t awws:foxy-f1t --build-arg USER=autoware .
+# docker build -t awws:foxy-f1t --build-arg USER=autoware -f dockerfile .
 # ./run.sh 1000 f1t-foxy
 
 # alias f1t-foxy='docker run --privileged -it -u 1000 -e SDL_VIDEODRIVER=x11 -e DISPLAY=$DISPLAY -e XAUTHORITY=$XAUTHORITY -v /tmp/.X11-unix:/tmp/.X11-unix -v $XAUTHORITY:$XAUTHORITY -v /usr/share/vulkan:/usr/share/vulkan -v /home/$USER/shared_dir:/home/$USER/shared_dir -v /dev:/dev --ipc=host --gpus '\''all,"capabilities=graphics,utility,display,video,compute"'\'' --net=host --runtime=nvidia ssu/misys:foxy-f1t-tutor-user'
 
-FROM nvcr.io/nvidia/l4t-base:r35.1.0
+FROM nvcr.io/nvidia/l4t-base:r35.2.1
 ARG USER
 
 ### install Sudo option
@@ -12,8 +12,10 @@ RUN apt update && apt -y upgrade
 RUN apt install sudo 
 
 RUN echo "${USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+RUN sudo echo USER="${USER}" >> ~/.bashrc
 
 ### create a default user
+# RUN sudo useradd -m $USER -u $UID
 RUN sudo adduser $USER && sudo adduser $USER sudo && sudo adduser $USER audio && sudo adduser $USER systemd-timesync && sudo adduser $USER video
 
 ### run under the name of $USER
@@ -53,10 +55,10 @@ RUN sudo ln -s /usr/local/bin/pip /usr/bin/pip && sudo ln -s /usr/local/bin/pip3
 
 ### edit .bashrc for environment setting
 WORKDIR /home/$USER
-RUN touch bashrc.foxy-tutor
-RUN echo "source /opt/ros/foxy/setup.bash" >> bashrc.foxy-tutor && echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> bashrc.foxy-tutor && echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> bashrc.foxy-tutor
-RUN echo "export PATH=\$PATH:~/.local/bin" >> bashrc.foxy-tutor
-RUN echo "source /home/$USER/bashrc.foxy-tutor" >> ~/.bashrc
+# RUN touch bashrc.foxy-tutor
+# RUN echo "source /opt/ros/foxy/setup.bash" >> bashrc.foxy-tutor && echo "source /usr/share/colcon_cd/function/colcon_cd.sh" >> bashrc.foxy-tutor && echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" >> bashrc.foxy-tutor
+# RUN echo "export PATH=\$PATH:~/.local/bin" >> bashrc.foxy-tutor
+RUN echo "source /home/$USER/shared_dir/bashrc.foxy-tutor" >> ~/.bashrc
 
 #############################################################
 ### ROS2 tutorials for foxy distro
@@ -68,6 +70,7 @@ RUN sudo apt update && sudo apt install -y ros-foxy-turtlesim && sudo apt instal
 ### Beginner: Client libraries
 
 ##### Using colcon to build packages
+RUN sudo apt update
 RUN sudo apt install -y python3-colcon-common-extensions && mkdir -p /home/${USER}/ros2_ws/src
 WORKDIR /home/$USER/ros2_ws
 RUN sudo git clone https://github.com/ros2/examples src/examples -b foxy
@@ -186,7 +189,7 @@ WORKDIR /home/$USER/f1t_ws
 RUN sudo apt-get install ros-foxy-diagnostic-updater
 RUN rosdep install -i --from-path src --rosdistro $_ros_dist --skip-keys=librealsense2 -y || true
 RUN /bin/bash -c "source /opt/ros/foxy/setup.bash"
-RUN sudo apt-get -y update && sudo apt-get -y upgrade
+RUN sudo apt-get update && sudo apt-get -y upgrade
 
 #############################################################
 ### hokuyo lidar
@@ -196,13 +199,10 @@ WORKDIR /home/$USER/f1t_ws/src
 RUN sudo git clone --recursive https://github.com/Hokuyo-aut/urg_node2.git
 WORKDIR /home/$USER/f1t_ws/
 RUN rosdep update --include-eol-distros && rosdep install -i --from-paths src --rosdistro foxy -y -r
-RUN sudo apt-get -y update && sudo apt-get -y upgrade
+RUN sudo apt-get update && sudo apt-get -y upgrade
 
 ### change the owner of copied files
 RUN sudo chown -R $USER:$USER /home/$USER/f1t_ws
-
-### need to add USER name
-RUN sudo echo USER="autoware" >> ~/.bashrc
 
 RUN /bin/bash -c "source /opt/ros/foxy/setup.bash"
 
