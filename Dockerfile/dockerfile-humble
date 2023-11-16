@@ -1,0 +1,91 @@
+# Image name: awws:foxy-f1t
+# docker build -t awws:humble-f1t --build-arg USER=autoware -f dockerfile-humble .
+# ./run.sh 1000 humble-f1t
+
+FROM dustynv/ros:humble-desktop-l4t-r35.2.1
+#https://github.com/dusty-nv/jetson-containers/tree/L4T-R35.2.1
+ARG USER
+
+### install Sudo option
+RUN apt update && \
+    apt remove -y opencv-libs && \
+    apt -y upgrade && \
+    apt install sudo
+
+RUN echo "${USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
+    sudo echo USER="${USER}" >> ~/.bashrc
+
+### create a default user
+RUN sudo adduser $USER && \
+    sudo adduser $USER sudo && \
+    sudo adduser $USER audio && \ 
+    sudo adduser $USER systemd-timesync && \
+    sudo adduser $USER video
+
+### run under the name of $USER
+USER $USER 
+WORKDIR /home/$USER
+
+### fix pip3-related bugs
+# RUN sudo mv /usr/local/lib/python3.8/dist-packages /usr/local/lib/python3.8/dist-packages.old
+# RUN sudo ln -s /usr/lib/python3/dist-packages/ /usr/local/lib/python3.8/dist-packages
+# RUN sudo apt-get update
+# RUN sudo apt-get install -y python3-pip && sudo pip3 install --upgrade pip
+# RUN sudo mv /usr/bin/pip /usr/bin/pip.old && sudo mv /usr/bin/pip3 /usr/bin/pip3.old
+# RUN sudo ln -s /usr/local/bin/pip /usr/bin/pip && sudo ln -s /usr/local/bin/pip3 /usr/bin/pip3
+
+
+### install vim , git
+RUN sudo apt-get install -y vim && \
+    sudo apt-get install -y git && \
+    sudo apt autoremove -y
+
+### edit .bashrc for environment setting
+WORKDIR /home/$USER
+RUN echo "source /home/$USER/shared_dir/bashrc.humble-tutor" >> ~/.bashrc
+
+WORKDIR /home/$USER/
+RUN mkdir -p f1t_ws/src
+
+# #############################################################
+# ### hokuyo lidar
+# #############################################################
+WORKDIR /home/$USER/f1t_ws/src
+RUN git clone --recursive https://github.com/Hokuyo-aut/urg_node2.git && \
+    git clone https://github.com/ros-perception/laser_proc.git -b ros2-devel && \
+    git clone https://github.com/ros/diagnostics.git -b ros2
+
+# #############################################################
+# ### vesc driver
+# #############################################################
+WORKDIR /home/$USER/f1t_ws/src
+RUN git clone https://github.com/ros-drivers/ackermann_msgs.git -b ros2 && \
+    git clone https://github.com/ros-drivers/transport_drivers.git -b humble && \
+    git clone https://github.com/f1tenth/vesc.git -b ros2 && \
+    git clone https://github.com/flynneva/udp_msgs.git
+
+# #############################################################
+# ### intel realsense d455
+# #############################################################
+RUN git clone https://github.com/IntelRealSense/realsense-ros.git -b ros2-development && \
+    git clone https://github.com/ros2/launch.git -b humble && \
+    git clone https://github.com/ros/xacro.git -b ros2 
+
+RUN sudo apt remove libopencv-dev opencv-dev opencv-libs opencv-main opencv-python opencv-scripts -y && \
+    sudo apt install libopencv-dev -y
+
+WORKDIR /home/$USER/f1t_ws/
+RUN sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE && \
+    sudo add-apt-repository "deb https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" -u && \
+    sudo apt-get install librealsense2-utils -y && \
+    sudo apt-get install librealsense2-dev -y
+
+RUN sudo apt-get update && \
+    sudo apt-get -y upgrade
+
+### change the owner of copied files
+RUN sudo chown -R $USER:$USER /home/$USER/f1t_ws
+
+### done!
+WORKDIR /home/$USER
+CMD ["bash"]
